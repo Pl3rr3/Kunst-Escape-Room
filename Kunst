@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Das verschwundene Meisterwerk</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+
+      background: #202020;
+      border-radius: 20px;
+      padding: 30px 22px;
+
+      text-align: center;
+
+      box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+    }
+
+    .kunst {
+      font-size: 50px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 10px 0;
+    }
+
+    h2 {
+      color: #f2c94c;
+    }
+
+    p {
+      color: #ddd;
+      line-height: 1.5;
+    }
+
+    /* Fortschrittsanzeige */
+
+    .fortschritt {
+      display: flex;
+      gap: 7px;
+      margin: 25px 0;
+    }
+
+    .schritt {
+      flex: 1;
+
+      padding: 9px 4px;
+
+      border-radius: 8px;
+
+      background: #333;
+      color: #999;
+
+      font-size: 13px;
+    }
+
+    .aktiv {
+      background: #f2c94c;
+      color: #111;
+      font-weight: bold;
+    }
+
+    .fertig {
+      background: #21703c;
+      color: white;
+    }
+
+    /* Eingabe */
+
+    input {
+      width: 100%;
+
+      padding: 15px;
+
+      margin: 15px 0 10px;
+
+      border: none;
+      border-radius: 10px;
+
+      font-size: 25px;
+
+      text-align: center;
+
+      letter-spacing: 6px;
+    }
+
+    button {
+      width: 100%;
+
+      padding: 15px;
+
+      border: none;
+      border-radius: 10px;
+
+      background: #f2c94c;
+      color: #111;
+
+      font-size: 18px;
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ffe27a;
+    }
+
+    /* Nachricht */
+
+    #nachricht {
+      display: none;
+
+      margin-top: 20px;
+
+      padding: 18px;
+
+      border-radius: 10px;
+
+      line-height: 1.5;
+    }
+
+    .richtig {
+      display: block !important;
+
+      background: #174d2b;
+      color: #caffd9;
+    }
+
+    .falsch {
+      display: block !important;
+
+      background: #591e1e;
+      color: #ffd4d4;
+    }
+
+    .gross {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .reset {
+      margin-top: 25px;
+
+      background: transparent;
+      color: #777;
+
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <div class="container">
+
+    <div class="kunst">🎨</div>
+
+    <h1>Das verschwundene Meisterwerk</h1>
+
+    <p>
+      Löst die Rätsel der Reihe nach.
+      Jeder richtige Code schaltet den nächsten Bereich frei.
+    </p>
+
+
+    <!-- Fortschritt -->
+
+    <div class="fortschritt">
+
+      <div id="schritt1" class="schritt aktiv">
+        1 · Galerie
+      </div>
+
+      <div id="schritt2" class="schritt">
+        2 · Atelier
+      </div>
+
+      <div id="schritt3" class="schritt">
+        3 · Formen
+      </div>
+
+    </div>
+
+
+    <!-- Aktueller Bereich -->
+
+    <h2 id="titel">
+      Bereich 1 – Die Galerie
+    </h2>
+
+    <p id="beschreibung">
+      Gebt den Code aus dem ersten Rätsel ein.
+    </p>
+
+
+    <!-- Code -->
+
+    <input
+      id="code"
+      type="tel"
+      inputmode="numeric"
+      placeholder="Zahlencode"
+    >
+
+    <button id="pruefen" onclick="codePruefen()">
+      CODE PRÜFEN
+    </button>
+
+
+    <!-- Ergebnis -->
+
+    <div id="nachricht"></div>
+
+
+    <!-- Nur zum Testen -->
+
+    <button class="reset" onclick="spielZuruecksetzen()">
+      Spiel zurücksetzen
+    </button>
+
+  </div>
+
+
+<script>
+
+  /*
+  ======================================================
+  HIER EURE ECHTEN CODES EINTRAGEN
+  ======================================================
+  */
+
+  const CODES = {
+
+    1: "7395",
+
+    2: "4826",
+
+    3: "856"
+
+  };
+
+
+  /*
+  ======================================================
+  SPIELFORTSCHRITT SPEICHERN
+  ======================================================
+  */
+
+  let bereich =
+    Number(localStorage.getItem("kunst_escape_room"))
+    || 1;
+
+
+  /*
+  ======================================================
+  SEITE AKTUALISIEREN
+  ======================================================
+  */
+
+  function seiteAktualisieren() {
+
+    const titel =
+      document.getElementById("titel");
+
+    const beschreibung =
+      document.getElementById("beschreibung");
+
+    const eingabe =
+      document.getElementById("code");
+
+    const button =
+      document.getElementById("pruefen");
+
+
+    /*
+    Fortschrittsanzeige
+    */
+
+    for (let i = 1; i <= 3; i++) {
+
+      const schritt =
+        document.getElementById("schritt" + i);
+
+      schritt.className = "schritt";
+
+
+      if (i < bereich) {
+
+        schritt.classList.add("fertig");
+
+      }
+
+
+      if (i === bereich) {
+
+        schritt.classList.add("aktiv");
+
+      }
+
+    }
+
+
+    /*
+    Bereich 1
+    */
+
+    if (bereich === 1) {
+
+      titel.innerHTML =
+        "Bereich 1 – Die Galerie";
+
+      beschreibung.innerHTML =
+        "Gebt den Code aus dem Bilder-Rätsel ein.";
+
+      eingabe.style.display = "block";
+      button.style.display = "block";
+
+    }
+
+
+    /*
+    Bereich 2
+    */
+
+    else if (bereich === 2) {
+
+      titel.innerHTML =
+        "Bereich 2 – Das Atelier";
+
+      beschreibung.innerHTML =
+        "Gebt den Code aus dem zerschnittenen Kunstwerk ein.";
+
+      eingabe.style.display = "block";
+      button.style.display = "block";
+
+    }
+
+
+    /*
+    Bereich 3
+    */
+
+    else if (bereich === 3) {
+
+      titel.innerHTML =
+        "Bereich 3 – Die Formen";
+
+      beschreibung.innerHTML =
+        "Gebt den Code aus dem Formen-Rätsel ein.";
+
+      eingabe.style.display = "block";
+      button.style.display = "block";
+
+    }
+
+
+    /*
+    ALLE RÄTSEL GELÖST
+    */
+
+    else {
+
+      titel.innerHTML =
+        "🏆 Meisterwerk gerettet!";
+
+      beschreibung.innerHTML =
+        "Ihr habt alle drei Rätsel gelöst. Geht jetzt zum Finale!";
+
+      eingabe.style.display = "none";
+      button.style.display = "none";
+
+    }
+
+  }
+
+
+
+  /*
+  ======================================================
+  CODE ÜBERPRÜFEN
+  ======================================================
+  */
+
+  function codePruefen() {
+
+    const eingabe =
+      document.getElementById("code");
+
+    const nachricht =
+      document.getElementById("nachricht");
+
+
+    const eingegebenerCode =
+      eingabe.value.trim();
+
+
+    nachricht.className = "";
+
+
+    /*
+    RICHTIGER CODE
+    */
+
+    if (eingegebenerCode === CODES[bereich]) {
+
+
+      /*
+      Bereich 1 → Bereich 2
+      */
+
+      if (bereich === 1) {
+
+        nachricht.className = "richtig";
+
+        nachricht.innerHTML =
+          `
+          <div class="gross">
+            ✅ CODE RICHTIG!
+          </div>
+
+          <br>
+
+          🔓 <strong>Bereich 2 ist freigeschaltet.</strong>
+
+          <br><br>
+
+          Ihr könnt jetzt in den nächsten Raum gehen.
+          `;
+
+        bereich = 2;
+
+      }
+
+
+      /*
+      Bereich 2 → Bereich 3
+      */
+
+      else if (bereich === 2) {
+
+        nachricht.className = "richtig";
+
+        nachricht.innerHTML =
+          `
+          <div class="gross">
+            ✅ CODE RICHTIG!
+          </div>
+
+          <br>
+
+          🔓 <strong>Bereich 3 ist freigeschaltet.</strong>
+
+          <br><br>
+
+          Ihr könnt jetzt in den nächsten Raum gehen.
+          `;
+
+        bereich = 3;
+
+      }
+
+
+      /*
+      Bereich 3 → FINALE
+      */
+
+      else if (bereich === 3) {
+
+        nachricht.className = "richtig";
+
+        nachricht.innerHTML =
+          `
+          <div class="gross">
+            🏆 GESCHAFFT!
+          </div>
+
+          <br>
+
+          <strong>
+            Ihr habt das Meisterwerk gerettet!
+          </strong>
+
+          <br><br>
+
+          Geht jetzt zum Finale.
+          `;
+
+        bereich = 4;
+
+      }
+
+
+      /*
+      Fortschritt auf dem Handy speichern
+      */
+
+      localStorage.setItem(
+        "kunst_escape_room",
+        bereich
+      );
+
+
+      /*
+      Eingabefeld leeren
+      */
+
+      eingabe.value = "";
+
+
+      /*
+      Seite aktualisieren
+      */
+
+      seiteAktualisieren();
+
+    }
+
+
+    /*
+    FALSCHER CODE
+    */
+
+    else {
+
+      nachricht.className = "falsch";
+
+      nachricht.innerHTML =
+        `
+        ❌ <strong>Falscher Code.</strong>
+
+        <br><br>
+
+        Schaut euch das Rätsel noch einmal genau an.
+        `;
+
+      eingabe.select();
+
+    }
+
+  }
+
+
+
+  /*
+  ======================================================
+  ENTER-TASTE
+  ======================================================
+  */
+
+  document
+    .getElementById("code")
+    .addEventListener("keydown", function(event) {
+
+      if (event.key === "Enter") {
+
+        codePruefen();
+
+      }
+
+    });
+
+
+
+  /*
+  ======================================================
+  SPIEL ZURÜCKSETZEN
+  ======================================================
+  */
+
+  function spielZuruecksetzen() {
+
+    const bestaetigung =
+      confirm(
+        "Soll das Spiel auf diesem Handy wirklich zurückgesetzt werden?"
+      );
+
+
+    if (bestaetigung) {
+
+      localStorage.removeItem(
+        "kunst_escape_room"
+      );
+
+      bereich = 1;
+
+      document.getElementById(
+        "nachricht"
+      ).className = "";
+
+      document.getElementById(
+        "nachricht"
+      ).innerHTML = "";
+
+      seiteAktualisieren();
+
+    }
+
+  }
+
+
+  /*
+  ======================================================
+  START
+  ======================================================
+  */
+
+  seiteAktualisieren();
+
+</script>
+
+</body>
+</html>
